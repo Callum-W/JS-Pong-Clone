@@ -1,0 +1,114 @@
+<html>
+<!-- Add a canvas element -->
+<canvas id = "gameCanvas" width="800" height = "600"></canvas>
+
+<script>
+var canvas;
+var canvasContext;
+
+var paddle1Y = 250;
+var paddle2Y = 250;
+const PADDLEHEIGHT = 100;
+const PADDLEWIDTH = 10;
+
+var ballX = 400;  // x-position of ball
+var ballSpeedX = 10; // horizontal ball speed
+
+var ballY = 300;  // y-position of ball
+var ballSpeedY = 5 // vertical ball speed
+
+// window.onload speficies that the following function runs after the page fully loads
+window.onload = function(){
+    console.log("Hello World!");
+    canvas = document.getElementById('gameCanvas');  // Pull canvas into this script
+    canvasContext = canvas.getContext('2d');  // Set up as 2d element
+
+    var framesPerSecond  = 30;
+
+    // do (arg1) function, every (arg2) milliseconds
+    setInterval(function() {
+        moveShapes(); 
+        drawShapes();
+    }, 1000/framesPerSecond);
+
+    // On mouse move, run inline function to get mouse pos and assign to paddle y-position
+    canvas.addEventListener('mousemove', function(evt) {
+        var mousePos = calculateMousePos(evt);
+        paddle1Y = mousePos.y - (PADDLEHEIGHT/2);
+    });
+}
+
+// ------------------ FUNCTIONS ------------------ //
+
+function moveShapes() {
+    ballX = ballX + ballSpeedX;
+    ballY = ballY + ballSpeedY;
+
+    // Reflect ball on left paddle
+    if (ballX <= 20) {
+        if (ballY >= paddle1Y - 5 && ballY <= paddle1Y + PADDLEHEIGHT + 5) {
+            ballSpeedX = -ballSpeedX;
+        }
+    }
+
+    // Reflect ball on right paddle
+    if (ballX >= canvas.width-20) {
+        if (ballY >= paddle2Y && ballY <= paddle2Y + PADDLEHEIGHT) {
+            ballSpeedX = -ballSpeedX;
+        }
+    }
+    
+    // Reset ball on X-border
+    if (ballX <= 0 || ballX >= canvas.width) {
+        ballReset();
+    }
+
+    // Reflect ball on Y-border
+    if (ballY >= canvas.height-10 || ballY <= 0) {
+        ballSpeedY = -ballSpeedY;
+    }
+}
+
+function drawShapes() {
+    colourRect(0,0,canvas.width,canvas.height,'black')  // Draws black canvas
+    colourRect(10,paddle1Y,PADDLEWIDTH,PADDLEHEIGHT, "white");  // Creates player paddle
+    colourRect(canvas.width-20,paddle2Y,PADDLEWIDTH,PADDLEHEIGHT);  // Creates computer paddle
+    colourCircle(ballX, ballY, 10, "white")  //Creates ball
+}
+
+function colourRect(leftX, topY, width, height, drawColour) {
+    // Create a coloured rectangle
+    canvasContext.fillStyle = drawColour;  // Set colour of rectangle
+    canvasContext.fillRect(leftX,topY,width,height);  // Draw rectangle starting from top left (x1,y1,width,height)
+}
+
+function colourCircle(centreX, centreY, radius, drawColour) {
+    // Create a coloured circle
+    canvasContext.fillStyle = drawColour;  // Set colour of circle
+    canvasContext.beginPath();  // Start path
+    canvasContext.arc(centreX, centreY, radius, 0, Math.PI*2, true)
+    canvasContext.fill();
+}
+
+function calculateMousePos(evt) {
+    // Determine mouse position relative to the canvas
+    var rect = canvas.getBoundingClientRect();
+    var root = document.documentElement;
+    var mouseX = evt.clientX - rect.left - root.scrollLeft;
+    var mouseY = evt.clientY - rect.top - root.scrollTop;
+    return {
+        x:mouseX,
+        y:mouseY
+    }
+    
+}
+
+function ballReset() {
+    ballSpeedX = - ballSpeedX;  // Swap direction on point
+    ballX = canvas.width/2;  // Reset X pos
+    ballY = canvas.height/2;  // Reset Y pos
+}
+
+</script>
+
+</html>
